@@ -17,8 +17,8 @@ import Liqpay.Client as Client
 
 data Liqpay = Liqpay { publicKey  :: Text
                      , privateKey :: Text
-                     , host        :: String
-                     , apiUrl      :: String }
+                     , host       :: String
+                     , apiUrl     :: String }
 
 type Params = Map.Map Text Text
 
@@ -26,14 +26,14 @@ type Params = Map.Map Text Text
 auth :: (Text,Text) -> Liqpay
 auth (public, private) = Liqpay { publicKey  = public
                                 , privateKey = private
-                                , host        = "www.liqpay.com"
-                                , apiUrl      = "/api/"}
+                                , host       = "www.liqpay.com"
+                                , apiUrl     = "/api/" }
 
 
 api :: String -> Params -> Liqpay -> IO ()
 api path params liqpay =
     Client.request (host liqpay) (apiUrl liqpay ++ path) params'
-    where params'     = insert (T.pack "public_key") (publicKey liqpay) params
+    where params' = insert (T.pack "public_key") (publicKey liqpay) params
 
 
 cnbForm :: Params -> Liqpay -> Html
@@ -47,11 +47,11 @@ cnbForm params liqpay = form ! formAttributes
           formAttributes  = 
               [ method "post"
               , action ("https://" ++ host liqpay ++ apiUrl liqpay ++ "pay")
-              , strAttr "accept-charset" "utf-8"]
+              , strAttr "accept-charset" "utf-8" ]
           imageAttributes = 
               [ thetype "image"
               , src ("//static.liqpay.com/button/p1" ++ T.unpack language ++ ".radius.png")
-              , name "btn_text"]
+              , name "btn_text" ]
 
 
 createHiddenInputAttr :: (Text, Text) ->  Html
@@ -62,7 +62,7 @@ createHiddenInputAttr (n,v) = input ! [ thetype "hidden"
      
 cnbSignature :: Params -> Liqpay -> String
 cnbSignature params liqpay = 
-    let signature   = T.unpack (privateKey liqpay)
+    let signature = T.unpack (privateKey liqpay)
             ++ maybe (error "amount cannot be Nothing") T.unpack (getText "amount" params)
             ++ maybe (error "currency cannot be Nothing") T.unpack (getText "currency" params)
             ++ T.unpack (publicKey liqpay)

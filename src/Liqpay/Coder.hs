@@ -1,4 +1,4 @@
-module Liqpay.Coder ( encodeSignature) where
+module Liqpay.Coder (encodeSignature) where
 
 import Data.Digest.Pure.SHA as S (sha1, bytestringDigest)
 import Data.ByteString.Lazy as L (ByteString)
