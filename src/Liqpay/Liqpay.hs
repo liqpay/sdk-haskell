@@ -10,6 +10,7 @@ import Text.XHtml.Strict
 import Data.ByteString.Lazy.Char8 as BLC (unpack)
 import Data.Text as T (Text, pack, unpack)
 import Data.Map.Lazy as Map (Map, lookup, insert, findWithDefault, toList)
+import Data.Monoid
 
 import Liqpay.Coder as LC
 import Liqpay.Client as Client
@@ -21,7 +22,6 @@ data Liqpay = Liqpay { publicKey  :: Text
                      , apiUrl     :: String }
 
 type Params = Map.Map Text Text
-
 
 auth :: (Text,Text) -> Liqpay
 auth (public, private) = Liqpay { publicKey  = public
@@ -66,18 +66,18 @@ cnbSignature params liqpay =
             ++ maybe (error "amount cannot be Nothing") T.unpack (getText "amount" params)
             ++ maybe (error "currency cannot be Nothing") T.unpack (getText "currency" params)
             ++ T.unpack (publicKey liqpay)
-            ++ maybe "" T.unpack (getText "order_id" params)
-            ++ maybe "" T.unpack (getText "type" params)
+            ++ maybe [] T.unpack (mconcat [ getText "order_id" params
+                                          , getText "type" params ])
             ++ maybe (error "description cannot be Nothing") T.unpack (getText "description" params)
-            ++ maybe "" T.unpack (getText "result_url" params)
-            ++ maybe "" T.unpack (getText "server_url" params)
-            ++ maybe "" T.unpack (getText "sender_first_name" params)
-            ++ maybe "" T.unpack (getText "sender_last_name" params)
-            ++ maybe "" T.unpack (getText "sender_middle_name" params)
-            ++ maybe "" T.unpack (getText "sender_country" params)
-            ++ maybe "" T.unpack (getText "sender_city" params)
-            ++ maybe "" T.unpack (getText "sender_address" params)
-            ++ maybe "" T.unpack (getText "sender_postal_code" params) 
+            ++ maybe [] T.unpack (mconcat [ getText "result_url" params
+                                          , getText "server_url" params
+                                          , getText "sender_first_name" params
+                                          , getText "sender_last_name" params
+                                          , getText "sender_middle_name" params
+                                          , getText "sender_country" params
+                                          , getText "sender_city" params
+                                          , getText "sender_address" params
+                                          , getText "sender_postal_code" params ])
         in signStr signature
 
 getText :: String -> Params -> Maybe Text
