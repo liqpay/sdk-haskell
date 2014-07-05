@@ -63,12 +63,12 @@ createHiddenInputAttr (n,v) = input ! [ thetype "hidden"
 cnbSignature :: Params -> Liqpay -> String
 cnbSignature params liqpay = 
     let signature = T.unpack (privateKey liqpay)
-            ++ maybe (error "amount cannot be Nothing") T.unpack (getText "amount" params)
-            ++ maybe (error "currency cannot be Nothing") T.unpack (getText "currency" params)
+            ++ validateParam "amount" params
+            ++ validateParam "currency" params
             ++ T.unpack (publicKey liqpay)
             ++ maybe [] T.unpack (mconcat [ getText "order_id" params
                                           , getText "type" params ])
-            ++ maybe (error "description cannot be Nothing") T.unpack (getText "description" params)
+            ++ validateParam "description" params
             ++ maybe [] T.unpack (mconcat [ getText "result_url" params
                                           , getText "server_url" params
                                           , getText "sender_first_name" params
@@ -82,6 +82,9 @@ cnbSignature params liqpay =
 
 getText :: String -> Params -> Maybe Text
 getText s = Map.lookup (T.pack s)
+
+validateParam :: String -> Params -> String
+validateParam key params = maybe (error (key ++ " cannot be Nothing")) T.unpack (getText key params)
 
 signStr :: String -> String
 signStr = BLC.unpack . LC.encodeSignature
