@@ -1,11 +1,8 @@
-module Liqpay.Tests.CoderSpec where
+module CoderSpec where
 
 import Test.Hspec
---import Test.QuickCheck
---import Control.Exception (evaluate)
-
-import Liqpay.Coder
 import Data.ByteString.Lazy.Char8 as BLC
+import Liqpay.Coder
 
 tests :: IO ()
 tests = hspec $ do

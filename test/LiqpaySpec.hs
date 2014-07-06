@@ -1,13 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Liqpay.Tests.LiqpaySpec where
+module LiqpaySpec where
 
 import Test.Hspec
 import Control.Exception (evaluate)
 import Data.Map.Lazy as Map
 import Data.Text as T
-
 import Text.XHtml.Strict (showHtmlFragment)
-
 import Liqpay.Liqpay
 
 tests :: IO ()

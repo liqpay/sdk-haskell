@@ -48,4 +48,4 @@ test-suite spec
                      http-streams,
                      xhtml >= 3000.2.1,
                      unordered-containers
-  hs-source-dirs:    src/Liqpay/Tests, src
+  hs-source-dirs:    test, src
