@@ -17,7 +17,7 @@ cabal-version:       >=1.8
 
 library
   build-depends:     base ==4.6.*,
-                     bytestring,
+                     bytestring >= 0.10,
                      SHA,
                      base64-bytestring,
                      containers,
@@ -26,7 +26,14 @@ library
                      io-streams,
                      http-streams,
                      xhtml >= 3000.2.1,
-                     unordered-containers
+                     unordered-containers,
+                     exceptions >= 0.6,
+                     transformers >= 0.3,
+                     monad-control >= 0.3.3,
+                     resourcet >= 1.1.2,
+                     conduit >= 1.1.2,
+                     conduit-extra >= 1.1.0,
+                     http-conduit >= 2.1.2
   hs-source-dirs:    src
   ghc-options:       -Wall -rtsopts -O2
 
@@ -38,7 +45,7 @@ test-suite spec
                      sdk-haskell,
                      hspec >= 1.10,
                      QuickCheck,
-                     bytestring,
+                     bytestring >= 0.10,
                      SHA,
                      base64-bytestring,
                      containers,
@@ -47,5 +54,12 @@ test-suite spec
                      io-streams,
                      http-streams,
                      xhtml >= 3000.2.1,
-                     unordered-containers
+                     unordered-containers,
+                     exceptions >= 0.6,
+                     transformers >= 0.3,
+                     monad-control >= 0.3.3,
+                     resourcet >= 1.1.2,
+                     conduit >= 1.1.2,
+                     conduit-extra >= 1.1.0,
+                     http-conduit >= 2.1.2
   hs-source-dirs:    test, src

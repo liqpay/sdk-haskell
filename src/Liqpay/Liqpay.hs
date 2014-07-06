@@ -8,12 +8,13 @@ module Liqpay.Liqpay
 
 import Text.XHtml.Strict
 import Data.ByteString.Lazy.Char8 as BLC (unpack, putStr, fromStrict)
+import qualified Data.ByteString.Lazy as BL (toStrict)
 import Data.Text as T (Text, pack, unpack)
 import Data.Map.Lazy as Map (Map, lookup, insert, findWithDefault, toList)
 import Data.Monoid
 
-import Liqpay.Coder as LC
-import Liqpay.Client as Client
+import qualified Liqpay.Coder as LC
+import qualified Liqpay.Client as Client
 
 
 data Liqpay = Liqpay { publicKey  :: Text
@@ -31,8 +32,11 @@ auth (public, private) = Liqpay { publicKey  = public
 
 
 api :: String -> Params -> Liqpay -> IO ()
-api path params liqpay =
-    Client.request (host liqpay) (apiUrl liqpay ++ path) params' >>= BLC.putStr . BLC.fromStrict
+api path params liqpay = do
+--    respBody <- Client.request (host liqpay) (apiUrl liqpay ++ path) params'
+--    BLC.putStr . BLC.fromStrict $ respBody
+    rbody <- Client.request' (host liqpay) (apiUrl liqpay ++ path) params' 
+    BLC.putStr . BLC.fromStrict . BL.toStrict $ rbody
     where params' = insert (T.pack "public_key") (publicKey liqpay) params
 
 
