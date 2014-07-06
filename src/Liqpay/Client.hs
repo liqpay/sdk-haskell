@@ -6,12 +6,13 @@ import Data.Map as Map
 import Data.Text as T
 import qualified Data.Text.Encoding as TE
 import Network.Http.Client
+import qualified Data.ByteString as S
 import Data.ByteString.Lazy.Char8 as BLC (pack, toStrict)
 import OpenSSL (withOpenSSL)
 import qualified OpenSSL.Session as SSL
 
 
-request :: String -> String -> Map Text Text -> IO ()
+request :: String -> String -> Map Text Text -> IO S.ByteString
 request host path params = withOpenSSL $ do
     let params'  = Map.map TE.encodeUtf8 params
         params'' = Map.mapKeys TE.encodeUtf8 params'
@@ -23,5 +24,7 @@ request host path params = withOpenSSL $ do
         setAccept "text/html"
         setContentType "application/json"
     sendRequest c q (encodedFormBody (Map.toList params''))
-    receiveResponse c debugHandler
+    r <- receiveResponse c concatHandler'
     closeConnection c
+    return r
+        

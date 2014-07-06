@@ -7,7 +7,7 @@ module Liqpay.Liqpay
     ) where
 
 import Text.XHtml.Strict
-import Data.ByteString.Lazy.Char8 as BLC (unpack)
+import Data.ByteString.Lazy.Char8 as BLC (unpack, putStr, fromStrict)
 import Data.Text as T (Text, pack, unpack)
 import Data.Map.Lazy as Map (Map, lookup, insert, findWithDefault, toList)
 import Data.Monoid
@@ -32,7 +32,7 @@ auth (public, private) = Liqpay { publicKey  = public
 
 api :: String -> Params -> Liqpay -> IO ()
 api path params liqpay =
-    Client.request (host liqpay) (apiUrl liqpay ++ path) params'
+    Client.request (host liqpay) (apiUrl liqpay ++ path) params' >>= BLC.putStr . BLC.fromStrict
     where params' = insert (T.pack "public_key") (publicKey liqpay) params
 
 
