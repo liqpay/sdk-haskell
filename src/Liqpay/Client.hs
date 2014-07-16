@@ -22,29 +22,12 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Catch (MonadThrow)
 import qualified Data.ByteString.Lazy.Internal as BLI (ByteString)
 
-
-request :: String -> String -> Map Text Text -> IO S.ByteString
-request hostname path' params = withOpenSSL $ do
-    let params'  = Map.map TE.encodeUtf8 params
-        params'' = Map.mapKeys TE.encodeUtf8 params'
-    ctx <- SSL.context
-    SSL.contextSetDefaultCiphers ctx
-    c <- openConnectionSSL ctx (BLC.toStrict (BLC.pack hostname)) 443
-    q <- buildRequest $ do
-        HCL.http POST $ BLC.toStrict $ BLC.pack path'
-        setAccept "text/html"
-        setContentType "application/json"
-    sendRequest c q (encodedFormBody (Map.toList params''))
-    r <- receiveResponse c concatHandler'
-    closeConnection c
-    return r
-
-request'
+request
   :: (MonadBaseControl IO m,
       MonadIO m,
       MonadThrow m) =>
      String -> String -> Map Text Text -> m BLI.ByteString
-request' hostname path' params = do
+request hostname path' params = do
     req <- parseUrl $ "https://" ++ hostname ++ path'
     withManager $ \manager -> do
         let params'  = Map.map TE.encodeUtf8 params
@@ -59,3 +42,20 @@ request' hostname path' params = do
         runResourceT $ do
             res <- httpLbs req'' manager
             return (responseBody res)
+
+
+request' :: String -> String -> Map Text Text -> IO S.ByteString
+request' hostname path' params = withOpenSSL $ do
+    let params'  = Map.map TE.encodeUtf8 params
+        params'' = Map.mapKeys TE.encodeUtf8 params'
+    ctx <- SSL.context
+    SSL.contextSetDefaultCiphers ctx
+    c <- openConnectionSSL ctx (BLC.toStrict (BLC.pack hostname)) 443
+    q <- buildRequest $ do
+        HCL.http POST $ BLC.toStrict $ BLC.pack path'
+        setAccept "text/html"
+        setContentType "application/json"
+    sendRequest c q (encodedFormBody (Map.toList params''))
+    r <- receiveResponse c concatHandler'
+    closeConnection c
+    return r

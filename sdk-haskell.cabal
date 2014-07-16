@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                sdk-haskell
-version:             0.0.1.0
+version:             0.0.2.0
 --synopsis:          
 description:         Payment method liqpay process
 homepage:            https://www.liqpay.com/ru/doc
@@ -33,7 +33,8 @@ library
                      resourcet >= 1.1.2,
                      conduit >= 1.1.2,
                      conduit-extra >= 1.1.0,
-                     http-conduit >= 2.1.2
+                     http-conduit >= 2.1.2,
+                     aeson >= 0.7.0
   hs-source-dirs:    src
   ghc-options:       -Wall -rtsopts -O2
 
@@ -61,5 +62,6 @@ test-suite spec
                      resourcet >= 1.1.2,
                      conduit >= 1.1.2,
                      conduit-extra >= 1.1.0,
-                     http-conduit >= 2.1.2
+                     http-conduit >= 2.1.2,
+                     aeson >= 0.7.0
   hs-source-dirs:    test, src

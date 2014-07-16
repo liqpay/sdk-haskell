@@ -7,37 +7,52 @@ module Liqpay.Liqpay
     ) where
 
 import Text.XHtml.Strict
-import Data.ByteString.Lazy.Char8 as BLC (unpack, putStr, fromStrict)
+import Data.ByteString.Lazy.Char8 as BLC (unpack, fromStrict)
 import qualified Data.ByteString.Lazy as BL (toStrict)
 import Data.Text as T (Text, pack, unpack)
 import Data.Map.Lazy as Map (Map, lookup, insert, findWithDefault, toList)
 import Data.Monoid
+import Data.Aeson (decode, Object)
 
 import qualified Liqpay.Coder as LC
 import qualified Liqpay.Client as Client
 
+type PublicKey = Text
+type PrivateKey = Text
 
-data Liqpay = Liqpay { publicKey  :: Text
-                     , privateKey :: Text
-                     , host       :: String
-                     , apiUrl     :: String }
-
-type Params = Map.Map Text Text
-
-auth :: (Text,Text) -> Liqpay
-auth (public, private) = Liqpay { publicKey  = public
-                                , privateKey = private
-                                , host       = "www.liqpay.com"
-                                , apiUrl     = "/api/" }
+data Liqpay = Liqpay { getPublicKey  :: PublicKey
+                     , getPrivateKey :: PrivateKey
+                     , getHost       :: String
+                     , getApiUrl     :: String }
 
 
-api :: String -> Params -> Liqpay -> IO ()
+type OperationName = String
+type Signature = String
+
+type ParamName = Text
+type ParamValue = Text
+
+type Params = Map.Map ParamName ParamValue
+
+type AttributeName = Text
+type AttributeValue = Text
+
+type ApiResponse = Maybe Object
+
+auth :: (PublicKey, PrivateKey) -> Liqpay
+auth (public, private) = Liqpay { getPublicKey  = public
+                                , getPrivateKey = private
+                                , getHost       = "www.liqpay.com"
+                                , getApiUrl     = "/api/" }
+
+
+api :: OperationName -> Params -> Liqpay -> IO ApiResponse
 api path params liqpay = do
---    respBody <- Client.request (host liqpay) (apiUrl liqpay ++ path) params'
---    BLC.putStr . BLC.fromStrict $ respBody
-    rbody <- Client.request' (host liqpay) (apiUrl liqpay ++ path) params' 
-    BLC.putStr . BLC.fromStrict . BL.toStrict $ rbody
-    where params' = insert (T.pack "public_key") (publicKey liqpay) params
+--    respBody <- Client.request' (getHost liqpay) (getApiUrl liqpay ++ path) params'
+--    return $ decode $ BLC.fromStrict $ respBody
+    respBody <- Client.request (getHost liqpay) (getApiUrl liqpay ++ path) params' 
+    return $ decode $ BLC.fromStrict . BL.toStrict $ respBody
+    where params' = insert (T.pack "public_key") (getPublicKey liqpay) params
 
 
 cnbForm :: Params -> Liqpay -> Html
@@ -46,11 +61,11 @@ cnbForm params liqpay = form ! formAttributes
         +++ (input ! imageAttributes)
     where language        = findWithDefault (T.pack "ru") (T.pack "language") params
           signature       = T.pack $ cnbSignature params liqpay
-          params'         = insert (T.pack "public_key") (publicKey liqpay) params
+          params'         = insert (T.pack "public_key") (getPublicKey liqpay) params
           params''        = insert (T.pack "signature") signature params'
           formAttributes  = 
               [ method "post"
-              , action ("https://" ++ host liqpay ++ apiUrl liqpay ++ "pay")
+              , action ("https://" ++ getHost liqpay ++ getApiUrl liqpay ++ "pay")
               , strAttr "accept-charset" "utf-8" ]
           imageAttributes = 
               [ thetype "image"
@@ -58,18 +73,18 @@ cnbForm params liqpay = form ! formAttributes
               , name "btn_text" ]
 
 
-createHiddenInputAttr :: (Text, Text) ->  Html
+createHiddenInputAttr :: (AttributeName, AttributeValue) ->  Html
 createHiddenInputAttr (n,v) = input ! [ thetype "hidden"
                                       , name (T.unpack n)
                                       , value (T.unpack v) ]
 
      
-cnbSignature :: Params -> Liqpay -> String
+cnbSignature :: Params -> Liqpay -> Signature
 cnbSignature params liqpay = 
-    let signature = T.unpack (privateKey liqpay)
+    let signature = T.unpack (getPrivateKey liqpay)
             ++ validateParam "amount" params
             ++ validateParam "currency" params
-            ++ T.unpack (publicKey liqpay)
+            ++ T.unpack (getPublicKey liqpay)
             ++ maybe [] T.unpack (mconcat [ getText "order_id" params
                                           , getText "type" params ])
             ++ validateParam "description" params

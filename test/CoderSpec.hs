@@ -8,4 +8,4 @@ tests :: IO ()
 tests = hspec $ do
     describe "Coder.encodeSignature" $ do
         it "returns encoded ByteString" $ do
-            encodeSignature "test" `shouldBe` (BLC.pack "qUqP5cyxm6YcTAhz05Hph5gvu9M=")
+            encodeSignature "test" `shouldBe` BLC.pack "qUqP5cyxm6YcTAhz05Hph5gvu9M="
