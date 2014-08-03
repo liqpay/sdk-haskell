@@ -65,3 +65,32 @@ test-suite spec
                      http-conduit >= 2.1.2,
                      aeson >= 0.7.0
   hs-source-dirs:    test, src
+
+executable sdk-profiler
+  main-is:           Spec.hs
+  ghc-options:       -O2
+                     -threaded
+                     -fprof-auto
+                     "-with-rtsopts=-N -p -s -h -i0.1"
+  build-depends:     base ==4.6.*,
+                     hspec >= 1.10,
+                     QuickCheck,
+                     bytestring >= 0.10,
+                     SHA,
+                     base64-bytestring,
+                     containers,
+                     text,
+                     HsOpenSSL,
+                     io-streams,
+                     http-streams >= 0.7.0,
+                     xhtml >= 3000.2.1,
+                     unordered-containers,
+                     exceptions >= 0.6,
+                     transformers >= 0.3,
+                     monad-control >= 0.3.3,
+                     resourcet >= 1.1.2,
+                     conduit >= 1.1.2,
+                     conduit-extra >= 1.1.0,
+                     http-conduit >= 2.1.2,
+                     aeson >= 0.7.0
+  hs-source-dirs:    test, src
