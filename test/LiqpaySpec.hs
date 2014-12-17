@@ -93,4 +93,8 @@ tests = hspec $ do
             let liqpay = auth ("public_key", "private_key")
                 params = Map.fromList [("version","3"),("amount","1"),("currency","UAH"),("description","my comment")]
             api "payment/status" params liqpay `shouldReturn` (decode "{\"result\":\"error\",\"description\":\"payment_not_found\"}" :: Maybe Object)
+        it "returns payment_not_found with valid params and signature build in status request when cyrillic symbols exists" $ do
+            let liqpay = auth ("public_key", "private_key")
+                params = Map.fromList [("version","3"),("amount","1"),("currency","UAH"),("description","мой комментарий")]
+            api "payment/status" params liqpay `shouldReturn` (decode "{\"result\":\"error\",\"description\":\"payment_not_found\"}" :: Maybe Object)
 -}

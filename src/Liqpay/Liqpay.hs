@@ -45,7 +45,8 @@ auth :: (PublicKey, PrivateKey) -> Liqpay
 auth (public, private) = Liqpay { getPublicKey  = public
                                 , getPrivateKey = private
                                 , getHost       = "www.liqpay.com"
-                                , getApiUrl     = "/api/" }
+                                , getApiUrl     = "/api/"
+                                }
 
 
 api :: OperationName -> Params -> Liqpay -> IO ApiResponse
@@ -105,7 +106,7 @@ cnbSignature params liqpay = do
     case verifiedParams of
         Left msg      -> Left msg
         Right params' -> do
-            let params''    =  insert (T.pack "public_key") (getPublicKey liqpay) params'
+            let params''   =  insert (T.pack "public_key") (getPublicKey liqpay) params'
                 signature  =  getPrivateKey liqpay
                            <> LC.encodeParams params''
                            <> getPrivateKey liqpay
