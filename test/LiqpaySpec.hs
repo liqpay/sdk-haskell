@@ -20,28 +20,28 @@ tests = hspec $ do
     describe "Liqpay.cnbSignature" $ do
         it "returns error without version" $ do
             let liqpay = auth ("public_key", "private_key")
-                signature = cnbSignature (Map.fromList [])
+                signature = cnbSignature Nothing (Map.fromList [])
                 in evaluate (signature liqpay) `shouldReturn` Left "version cannot be Nothing"
         it "returns error without amount" $ do
             let liqpay = auth ("public_key", "private_key")
-                signature = cnbSignature (Map.fromList [("version","3")])
+                signature = cnbSignature Nothing (Map.fromList [("version","3")])
                 in evaluate (signature liqpay) `shouldReturn` Left "amount cannot be Nothing"
         it "returns error without currency" $ do
             let liqpay = auth ("public_key", "private_key")
-                signature = cnbSignature (Map.fromList [("version","3"),("amount","0")])
+                signature = cnbSignature Nothing (Map.fromList [("version","3"),("amount","0")])
                 in evaluate (signature liqpay) `shouldReturn` Left "currency cannot be Nothing"
         it "returns error without description" $ do
             let liqpay = auth ("public_key", "private_key")
-                signature = cnbSignature (Map.fromList [("version","3"),("amount","0"),("currency","UAH")])
+                signature = cnbSignature Nothing (Map.fromList [("version","3"),("amount","0"),("currency","UAH")])
                 in evaluate (signature liqpay) `shouldReturn` Left "description cannot be Nothing"
         it "returns valid signature if all params are present" $ do
             let liqpay = auth ("public_key", "private_key")
-                signature = cnbSignature (Map.fromList [("version","3"),("amount","0"),("currency","UAH"),("description","my comment")])
+                signature = cnbSignature Nothing (Map.fromList [("version","3"),("amount","0"),("currency","UAH"),("description","my comment")])
                 in evaluate (signature liqpay) `shouldReturn` Right "3B1QfGVzwj/VthFyuXf29kuomxU="
 --                in evaluate (signature liqpay) `shouldReturn` Right "D6rMq11PauA5L4ZWIIF/8d/RDoI="
         it "returns valid signature if cyrillic symbols are present" $ do
             let liqpay = auth ("public_key", "private_key")
-                signature = cnbSignature (Map.fromList [("version","3"),("amount","0"),("currency","UAH"),("description","мой комментарий")])
+                signature = cnbSignature Nothing (Map.fromList [("version","3"),("amount","0"),("currency","UAH"),("description","мой комментарий")])
                 in evaluate (signature liqpay) `shouldReturn` Right "oB03d0G62VZLBNCxgWsSZS+sV1s="
 --                in evaluate (signature liqpay) `shouldReturn` Right "JDHCPlnRhBj5mf/biMw0cXbxXu4="
 
@@ -72,19 +72,11 @@ tests = hspec $ do
             let liqpay = auth ("public_key", "private_key")
                 params = Map.fromList []
             api "payment/pay" params liqpay `shouldReturn` (decode "{\"error\":\"version cannot be Nothing\"}" :: Maybe Object)
+{-
         it "returns error without amount" $ do
             let liqpay = auth ("public_key", "private_key")
                 params = Map.fromList [("version","3")]
-            api "payment/pay" params liqpay `shouldReturn` (decode "{\"error\":\"amount cannot be Nothing\"}" :: Maybe Object)
-        it "returns error without currency" $ do
-            let liqpay = auth ("public_key", "private_key")
-                params = Map.fromList [("version","3"),("amount","1")]
-            api "payment/pay" params liqpay `shouldReturn` (decode "{\"error\":\"currency cannot be Nothing\"}" :: Maybe Object)
-        it "returns error without description" $ do
-            let liqpay = auth ("public_key", "private_key")
-                params = Map.fromList [("version","3"),("amount","1"),("currency","UAH")]
-            api "payment/pay" params liqpay `shouldReturn` (decode "{\"error\":\"description cannot be Nothing\"}" :: Maybe Object)
-{-
+            api "payment/pay" params liqpay `shouldReturn` (decode "{\"result\":\"err_access\",\"code\":\"err_access\"}" :: Maybe Object)
         it "returns err_access with valid params and signature build in pay request" $ do
             let liqpay = auth ("public_key", "private_key")
                 params = Map.fromList [("version","3"),("amount","1"),("currency","UAH"),("description","my comment")]

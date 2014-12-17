@@ -25,7 +25,8 @@ type PrivateKey = Text
 data Liqpay = Liqpay { getPublicKey  :: PublicKey
                      , getPrivateKey :: PrivateKey
                      , getHost       :: String
-                     , getApiUrl     :: String }
+                     , getApiUrl     :: String
+                     }
 
 
 type OperationName = String
@@ -33,6 +34,8 @@ type Signature = Either Text Text
 
 type ParamName = Text
 type ParamValue = Text
+
+type ValidationParamName = String
 
 type Params = Map.Map ParamName ParamValue
 
@@ -52,7 +55,7 @@ auth (public, private) = Liqpay { getPublicKey  = public
 api :: OperationName -> Params -> Liqpay -> IO ApiResponse
 api path params liqpay = do
     let encData = LC.encodeParams params'
-        signature = cnbSignature params' liqpay
+        signature = cnbSignature (Just ["version"]) params' liqpay
     case signature of
         Left msg         -> return $ toMObject $ A.object [(T.pack "error", String msg)]
         Right signature' -> do
@@ -66,31 +69,27 @@ api path params liqpay = do
 
 cnbForm :: Params -> Liqpay -> Either Text Html
 cnbForm params liqpay = do
-    let  verifiedParams  = validateParam "version" (Right params)
-    case verifiedParams of
-        Left msg      -> Left msg
-        Right params' -> do
-            let language        = findWithDefault (T.pack "ru") (T.pack "language") params'
-                params''        = insert (T.pack "public_key") (getPublicKey liqpay) params'
-                encData         = LC.encodeParams params''
-                signature       = cnbSignature params'' liqpay
-            case signature of
-                Left msg         -> Left msg
-                Right signature' -> Right $ form ! formAttributes << fmap createHiddenInputAttr (toList encParams)
-                                                          +++ (input ! imageAttributes)
-                    where encParams       = Map.fromList [ (T.pack "data" , encData)
-                                                         , (T.pack "signature" , signature')
-                                                         ]
-                          formAttributes  =
-                              [ method "post"
-                              , action ("https://" ++ getHost liqpay ++ getApiUrl liqpay ++ "checkout")
-                              , strAttr "accept-charset" "utf-8"
-                              ]
-                          imageAttributes =
-                              [ thetype "image"
-                              , src ("//static.liqpay.com/button/p1" ++ T.unpack language ++ ".radius.png")
-                              , name "btn_text"
-                              ]
+    let language        = findWithDefault (T.pack "ru") (T.pack "language") params
+        params'        = insert (T.pack "public_key") (getPublicKey liqpay) params
+        encData         = LC.encodeParams params'
+        signature       = cnbSignature defaultValidationParams params' liqpay
+    case signature of
+        Left msg         -> Left msg
+        Right signature' -> Right $ form ! formAttributes << fmap createHiddenInputAttr (toList encParams)
+                                                  +++ (input ! imageAttributes)
+            where encParams       = Map.fromList [ (T.pack "data" , encData)
+                                                 , (T.pack "signature" , signature')
+                                                 ]
+                  formAttributes  =
+                      [ method "post"
+                      , action ("https://" ++ getHost liqpay ++ getApiUrl liqpay ++ "checkout")
+                      , strAttr "accept-charset" "utf-8"
+                      ]
+                  imageAttributes =
+                      [ thetype "image"
+                      , src ("//static.liqpay.com/button/p1" ++ T.unpack language ++ ".radius.png")
+                      , name "btn_text"
+                      ]
 
 
 createHiddenInputAttr :: (AttributeName, AttributeValue) ->  Html
@@ -99,10 +98,15 @@ createHiddenInputAttr (n,v) = input ! [ thetype "hidden"
                                       , value (T.unpack v)
                                       ]
 
+defaultValidationParams :: Maybe [ValidationParamName]
+defaultValidationParams = Nothing
 
-cnbSignature :: Params -> Liqpay -> Signature
-cnbSignature params liqpay = do
-    let verifiedParams = validateParam "description" $ validateParam "currency" $ validateParam "amount" $ validateParam "version" (Right params)
+cnbSignature :: Maybe [ValidationParamName] -> Params -> Liqpay -> Signature
+cnbSignature mPNames params liqpay = do
+    let pnames = case mPNames of
+            Nothing -> ["version", "amount", "currency", "description"]
+            Just pn -> pn
+        verifiedParams = foldl (\params' pname -> validateParam pname params') (Right params) pnames
     case verifiedParams of
         Left msg      -> Left msg
         Right params' -> do
