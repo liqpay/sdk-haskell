@@ -10,10 +10,10 @@ import Text.XHtml.Strict
 import Data.ByteString.Lazy.Char8 as BLC (unpack, fromStrict)
 import qualified Data.ByteString.Lazy as BL (toStrict)
 import Data.Text as T (Text, pack, unpack)
-import Data.Map.Lazy as Map (Map, lookup, insert, findWithDefault, toList)
+import Data.Map.Lazy as Map (Map, lookup, insert, findWithDefault, toList, fromList)
 import Data.Monoid ((<>))
 import Data.Aeson as A (decode, object, Value(..), Object)
-import Data.Map.Lazy as Map (fromList)
+import Data.Maybe (fromMaybe, isNothing)
 
 import qualified Liqpay.Coder as LC
 import qualified Liqpay.Client as Client
@@ -22,10 +22,10 @@ import qualified Liqpay.Client as Client
 type PublicKey = Text
 type PrivateKey = Text
 
-data Liqpay = Liqpay { getPublicKey  :: PublicKey
-                     , getPrivateKey :: PrivateKey
-                     , getHost       :: String
-                     , getApiUrl     :: String
+data Liqpay = Liqpay { getPublicKey  :: !PublicKey
+                     , getPrivateKey :: !PrivateKey
+                     , getHost       :: !String
+                     , getApiUrl     :: !String
                      }
 
 
@@ -103,18 +103,15 @@ defaultValidationParams = Nothing
 
 cnbSignature :: Maybe [ValidationParamName] -> Params -> Liqpay -> Signature
 cnbSignature mPNames params liqpay = do
-    let pnames = case mPNames of
-            Nothing -> ["version", "amount", "currency", "description"]
-            Just pn -> pn
-        verifiedParams = foldl (\params' pname -> validateParam pname params') (Right params) pnames
+    let pnames         = fromMaybe ["version", "amount", "currency", "description"] mPNames
+        verifiedParams = foldl (flip validateParam) (Right params) pnames
     case verifiedParams of
         Left msg      -> Left msg
-        Right params' -> do
-            let params''   =  insert (T.pack "public_key") (getPublicKey liqpay) params'
-                signature  =  getPrivateKey liqpay
-                           <> LC.encodeParams params''
-                           <> getPrivateKey liqpay
-                in Right (signStr signature)
+        Right params' -> let params''   =  insert (T.pack "public_key") (getPublicKey liqpay) params'
+                             signature  =  getPrivateKey liqpay
+                                        <> LC.encodeParams params''
+                                        <> getPrivateKey liqpay
+                         in Right (signStr signature)
 
 
 getText :: String -> Params -> Maybe Text
@@ -123,9 +120,9 @@ getText s = Map.lookup (T.pack s)
 validateParam :: String -> Either Text Params -> Either Text Params
 validateParam key params = case params of
     Left msg      -> Left msg
-    Right params' -> if getText key params' == Nothing
-                    then Left $ T.pack (key ++ " cannot be Nothing")
-                    else params
+    Right params' -> if isNothing (getText key params')
+                     then Left $ T.pack (key ++ " cannot be Nothing")
+                     else params
 
 signStr :: Text -> Text
 signStr = T.pack . BLC.unpack . LC.encodeSignature
