@@ -82,7 +82,7 @@ cnbForm params liqpay = do
                                                  ]
                   formAttributes  =
                       [ method "post"
-                      , action ("https://" ++ getHost liqpay ++ getApiUrl liqpay ++ "checkout")
+                      , action ("https://" ++ getHost liqpay ++ getApiUrl liqpay ++ "3/checkout")
                       , strAttr "accept-charset" "utf-8"
                       ]
                   imageAttributes =
