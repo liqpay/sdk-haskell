@@ -65,7 +65,7 @@ tests = hspec $ do
                 html = case form of
                     Left msg -> msg
                     Right html' -> pack $ show html'
-                in evaluate html `shouldReturn` "<form method=\"post\" action=\"https://www.liqpay.com/api/checkout\" accept-charset=\"utf-8\"\n><input type=\"hidden\" name=\"data\" value=\"eyJhbW91bnQiOiIxIiwicHVibGljX2tleSI6InB1YmxpY19rZXkiLCJjdXJyZW5jeSI6IlVBSCIsInZlcnNpb24iOiIzIiwiZGVzY3JpcHRpb24iOiJteSBjb21tZW50In0=\"\n   /><input type=\"hidden\" name=\"signature\" value=\"QfUGmGtN0Fg7KWhYHSiWfpWcpHw=\"\n   /></form\n><input type=\"image\" src=\"//static.liqpay.com/button/p1ru.radius.png\" name=\"btn_text\"\n />"
+                in evaluate html `shouldReturn` "<form method=\"post\" action=\"https://www.liqpay.ua/api/checkout\" accept-charset=\"utf-8\"\n><input type=\"hidden\" name=\"data\" value=\"eyJhbW91bnQiOiIxIiwicHVibGljX2tleSI6InB1YmxpY19rZXkiLCJjdXJyZW5jeSI6IlVBSCIsInZlcnNpb24iOiIzIiwiZGVzY3JpcHRpb24iOiJteSBjb21tZW50In0=\"\n   /><input type=\"hidden\" name=\"signature\" value=\"QfUGmGtN0Fg7KWhYHSiWfpWcpHw=\"\n   /></form\n><input type=\"image\" src=\"//static.liqpay.com/button/p1ru.radius.png\" name=\"btn_text\"\n />"
 
     describe "Liqpay.api" $ do
         it "returns error without version" $ do

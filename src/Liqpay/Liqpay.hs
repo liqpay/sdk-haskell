@@ -47,7 +47,7 @@ type ApiResponse = Maybe Object
 auth :: (PublicKey, PrivateKey) -> Liqpay
 auth (public, private) = Liqpay { getPublicKey  = public
                                 , getPrivateKey = private
-                                , getHost       = "www.liqpay.com"
+                                , getHost       = "www.liqpay.ua"
                                 , getApiUrl     = "/api/"
                                 }
 
@@ -87,7 +87,7 @@ cnbForm params liqpay = do
                       ]
                   imageAttributes =
                       [ thetype "image"
-                      , src ("//static.liqpay.com/button/p1" ++ T.unpack language ++ ".radius.png")
+                      , src ("//static.liqpay.ua/button/p1" ++ T.unpack language ++ ".radius.png")
                       , name "btn_text"
                       ]
 
