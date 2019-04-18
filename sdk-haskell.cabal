@@ -4,11 +4,11 @@
 name:                sdk-haskell
 version:             0.0.3.2
 description:         Payment method liqpay process
-homepage:            https://www.liqpay.com/ru/doc
+homepage:            https://www.liqpay.ua/documentation/ru
 license:             OtherLicense
 license-file:        LICENSE
 author:              Liqpay
-maintainer:          support@liqpay.com
+maintainer:          support@liqpay.ua
 copyright:           Copyright (c) 2015 Liqpay
 category:            Web
 build-type:          Simple
